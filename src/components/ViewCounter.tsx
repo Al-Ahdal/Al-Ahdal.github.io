@@ -11,20 +11,49 @@ const ViewCounter = ({ currentLang }: ViewCounterProps) => {
   const t = translations[currentLang];
 
   useEffect(() => {
-    // Get current count from localStorage
-    const currentCount = parseInt(localStorage.getItem("portfolioViews") || "0");
-    const lastVisit = localStorage.getItem("lastVisit");
-    const today = new Date().toDateString();
+    // This component previously used localStorage only (client-side count).
+    // To provide a global count, call a simple public counter API (CountAPI).
+    // We still only increment once per day per visitor (controlled by lastVisit).
+    const namespace = "alahdal-portfolio"; // change if you prefer a different namespace
+    const key = "portfolio-views";
 
-    // Only increment if it's a new day or first visit
-    if (lastVisit !== today) {
-      const newCount = currentCount + 1;
-      localStorage.setItem("portfolioViews", newCount.toString());
-      localStorage.setItem("lastVisit", today);
-      setViewCount(newCount);
-    } else {
-      setViewCount(currentCount);
-    }
+    const syncCount = async () => {
+      const lastVisit = localStorage.getItem("lastVisit");
+      const today = new Date().toDateString();
+
+      try {
+        if (lastVisit !== today) {
+          // Increment the global counter
+          const res = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+          const data = await res.json();
+          const value = typeof data.value === "number" ? data.value : 0;
+          localStorage.setItem("lastVisit", today);
+          localStorage.setItem("portfolioViews", value.toString());
+          setViewCount(value);
+        } else {
+          // Just read the current global value
+          const res = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
+          const data = await res.json();
+          const value = typeof data.value === "number" ? data.value : parseInt(localStorage.getItem("portfolioViews") || "0");
+          setViewCount(value);
+        }
+      } catch (err) {
+        // Network failed — fall back to localStorage-only behavior
+        const currentCount = parseInt(localStorage.getItem("portfolioViews") || "0");
+        const last = localStorage.getItem("lastVisit");
+        const today = new Date().toDateString();
+        if (last !== today) {
+          const newCount = currentCount + 1;
+          localStorage.setItem("portfolioViews", newCount.toString());
+          localStorage.setItem("lastVisit", today);
+          setViewCount(newCount);
+        } else {
+          setViewCount(currentCount);
+        }
+      }
+    };
+
+    void syncCount();
   }, []);
 
   return (
