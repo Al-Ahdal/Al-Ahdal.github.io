@@ -7,31 +7,46 @@ interface ViewCounterProps {
 }
 
 const BASE_COUNT = 1247;
-const NAMESPACE = "al-ahdal-portfolio";
-const KEY = "views";
+const STORAGE_KEY = "portfolioViews";
+const SESSION_KEY = "portfolioSessionCounted";
 
 const ViewCounter = ({ currentLang }: ViewCounterProps) => {
-  const [viewCount, setViewCount] = useState<number>(BASE_COUNT);
+  const [viewCount, setViewCount] = useState<number>(0);
   const t = translations[currentLang];
 
   useEffect(() => {
-    const fetchViews = async () => {
+    const countView = async () => {
+      // Try external API first
       try {
-        // Increment counter
-        const hitResponse = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
-        const hitData = await hitResponse.json();
-        
-        if (hitData.value) {
-          setViewCount(hitData.value);
+        const response = await fetch(
+          "https://counterapi.com/api/al-ahdal.github.io/view/portfolio"
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.value) {
+            setViewCount(data.value);
+            localStorage.setItem(STORAGE_KEY, data.value.toString());
+            return;
+          }
         }
-      } catch (error) {
-        console.error("Failed to fetch view count:", error);
-        // Fallback to base count if API fails
-        setViewCount(BASE_COUNT);
+      } catch {
+        // API failed, use localStorage fallback
       }
+
+      // Fallback: localStorage-based counting
+      const stored = parseInt(localStorage.getItem(STORAGE_KEY) || "0");
+      const sessionCounted = sessionStorage.getItem(SESSION_KEY);
+
+      let newCount = stored || BASE_COUNT;
+      if (!sessionCounted) {
+        newCount = (stored || BASE_COUNT) + 1;
+        localStorage.setItem(STORAGE_KEY, newCount.toString());
+        sessionStorage.setItem(SESSION_KEY, "true");
+      }
+      setViewCount(newCount);
     };
 
-    fetchViews();
+    countView();
   }, []);
 
   return (

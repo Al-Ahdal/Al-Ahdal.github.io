@@ -21,14 +21,22 @@ const ContactSection = ({ t }: ContactSectionProps) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      toast({
-        title: t.messageSent,
-        description: t.messageSentDesc,
-      });
-      setIsSubmitting(false);
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+    const form = e.target as HTMLFormElement;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const message = (form.elements.namedItem("message") as HTMLTextAreaElement).value;
+
+    const subject = encodeURIComponent(`Portfolio Contact: ${name}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+
+    window.location.href = `mailto:ahmed.alahdal21@gmail.com?subject=${subject}&body=${body}`;
+
+    toast({
+      title: t.messageSent,
+      description: t.messageSentDesc,
+    });
+    setIsSubmitting(false);
+    form.reset();
   };
 
   return (
