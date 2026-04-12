@@ -6,6 +6,7 @@ import { Github, Linkedin, Mail, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Translations } from "@/types/translations";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 interface ContactSectionProps {
   t: Translations;
@@ -14,34 +15,35 @@ interface ContactSectionProps {
 const ContactSection = ({ t }: ContactSectionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { ref, isVisible } = useScrollAnimation<HTMLElement>();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
     setTimeout(() => {
       toast({
-        title: "Message sent!",
-        description: "Thank you for reaching out. I'll get back to you soon.",
+        title: t.messageSent,
+        description: t.messageSentDesc,
       });
       setIsSubmitting(false);
+      (e.target as HTMLFormElement).reset();
     }, 1000);
   };
 
   return (
-    <section id="contact" className="py-24 relative">
-      <div className="container mx-auto px-6">
+    <section id="contact" className="py-16 md:py-24 relative" ref={ref}>
+      <div className={`container mx-auto px-6 ${isVisible ? "scroll-visible" : "scroll-hidden"}`}>
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="font-mono text-primary">06.</span> {t.contactTitle}
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            {t.contactTitle}
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             {t.contactSubtitle}
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Contact Info */}
           <div className="space-y-6">
             <Card className="p-6 bg-card border-border shadow-card">
@@ -52,11 +54,11 @@ const ContactSection = ({ t }: ContactSectionProps) => {
                   href="mailto:ahmed.alahdal21@gmail.com"
                   className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-smooth group"
                 >
-                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium">Email</div>
+                    <div className="text-sm font-medium">{t.emailLabel2}</div>
                     <div className="text-sm text-muted-foreground">ahmed.alahdal21@gmail.com</div>
                   </div>
                 </a>
@@ -67,11 +69,11 @@ const ContactSection = ({ t }: ContactSectionProps) => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-smooth group"
                 >
-                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <Linkedin className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium">LinkedIn</div>
+                    <div className="text-sm font-medium">{t.linkedinLabel}</div>
                     <div className="text-sm text-muted-foreground">ahmed-al-ahdal</div>
                   </div>
                 </a>
@@ -82,22 +84,21 @@ const ContactSection = ({ t }: ContactSectionProps) => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-smooth group"
                 >
-                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <Github className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium">GitHub</div>
+                    <div className="text-sm font-medium">{t.githubLabel}</div>
                     <div className="text-sm text-muted-foreground">Al-Ahdal</div>
                   </div>
                 </a>
               </div>
             </Card>
 
-            <div className="p-6 rounded-lg border border-border bg-card/50">
-              <h4 className="font-semibold mb-2">Open to opportunities</h4>
+            <div className="p-6 rounded-lg border border-primary/20 bg-primary/5">
+              <h4 className="font-semibold mb-2">{t.openToOpportunities}</h4>
               <p className="text-sm text-muted-foreground">
-                Currently available for freelance projects and full-time positions. 
-                Specializing in Odoo ERP implementations and custom development.
+                {t.openToDesc}
               </p>
             </div>
           </div>
@@ -108,8 +109,9 @@ const ContactSection = ({ t }: ContactSectionProps) => {
               <div>
                 <Input 
                   placeholder={t.nameLabel}
+                  name="name"
                   required
-                  className="bg-background border-border"
+                  className="bg-background border-border focus:border-primary"
                 />
               </div>
               
@@ -117,17 +119,19 @@ const ContactSection = ({ t }: ContactSectionProps) => {
                 <Input 
                   type="email"
                   placeholder={t.emailLabel}
+                  name="email"
                   required
-                  className="bg-background border-border"
+                  className="bg-background border-border focus:border-primary"
                 />
               </div>
 
               <div>
                 <Textarea 
                   placeholder={t.messageLabel}
+                  name="message"
                   required
                   rows={6}
-                  className="bg-background border-border resize-none"
+                  className="bg-background border-border focus:border-primary resize-none"
                 />
               </div>
 
@@ -136,7 +140,7 @@ const ContactSection = ({ t }: ContactSectionProps) => {
                 className="w-full gradient-primary text-primary-foreground shadow-glow group"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Sending..." : t.sendMessage}
+                {isSubmitting ? t.sending : t.sendMessage}
                 <Send className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>

@@ -54,20 +54,20 @@ const Navbar = ({ currentLang, onLanguageChange }: NavbarProps) => {
             {/* Logo */}
             <a 
               href="#" 
-              className="font-mono text-xl font-bold text-primary hover:opacity-80 transition-opacity"
+              className="font-mono text-lg md:text-xl font-bold text-primary hover:opacity-80 transition-opacity"
             >
-              {"<AA />"}
+              {t.name}
             </a>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              {navItems.map((item, index) => (
+            <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+              {navItems.map((item) => (
                 <button
                   key={item.href}
                   onClick={() => scrollToSection(item.href)}
                   className="text-sm font-mono text-muted-foreground hover:text-primary transition-colors group"
                 >
-                  <span className="text-primary">0{index + 2}.</span> {item.label}
+                  {item.label}
                 </button>
               ))}
               <div className="flex items-center gap-2">
@@ -77,56 +77,64 @@ const Navbar = ({ currentLang, onLanguageChange }: NavbarProps) => {
                   onLanguageChange={onLanguageChange}
                 />
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              <a 
+                href="/cv.pdf" 
+                target="_blank" 
+                rel="noopener noreferrer"
               >
-                {t.resume}
-              </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  {t.resume}
+                </Button>
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-foreground hover:text-primary transition-colors"
-            >
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <ThemeToggle />
+              <LanguageSwitcher 
+                currentLang={currentLang} 
+                onLanguageChange={onLanguageChange}
+              />
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                {isMobileMenuOpen ? <X /> : <Menu />}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div 
-            className="absolute inset-0 bg-background/95 backdrop-blur-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          <div className="relative flex flex-col items-center justify-center h-full space-y-8">
-            {navItems.map((item, index) => (
+        <div className="fixed inset-0 z-40 lg:hidden bg-background/95 backdrop-blur-lg pt-20">
+          <div className="flex flex-col items-center justify-center h-full gap-6 pb-20">
+            {navItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="text-2xl font-mono text-muted-foreground hover:text-primary transition-colors"
+                className="text-xl font-mono text-muted-foreground hover:text-primary transition-colors"
               >
-                <span className="text-primary">0{index + 2}.</span> {item.label}
+                {item.label}
               </button>
             ))}
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <LanguageSwitcher 
-                currentLang={currentLang} 
-                onLanguageChange={onLanguageChange}
-              />
-            </div>
-            <Button 
-              variant="outline" 
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            <a 
+              href="/cv.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer"
             >
-              {t.resume}
-            </Button>
+              <Button 
+                variant="outline" 
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                {t.resume}
+              </Button>
+            </a>
           </div>
         </div>
       )}
