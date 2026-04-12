@@ -7,26 +7,31 @@ interface ViewCounterProps {
 }
 
 const BASE_COUNT = 1247;
-const STORAGE_KEY = "portfolioViews";
-const VISIT_KEY = "lastVisit";
+const NAMESPACE = "al-ahdal-portfolio";
+const KEY = "views";
 
 const ViewCounter = ({ currentLang }: ViewCounterProps) => {
-  const [viewCount, setViewCount] = useState<number>(0);
+  const [viewCount, setViewCount] = useState<number>(BASE_COUNT);
   const t = translations[currentLang];
 
   useEffect(() => {
-    const lastVisit = localStorage.getItem(VISIT_KEY);
-    const today = new Date().toDateString();
-    const stored = parseInt(localStorage.getItem(STORAGE_KEY) || "0");
+    const fetchViews = async () => {
+      try {
+        // Increment counter
+        const hitResponse = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`);
+        const hitData = await hitResponse.json();
+        
+        if (hitData.value) {
+          setViewCount(hitData.value);
+        }
+      } catch (error) {
+        console.error("Failed to fetch view count:", error);
+        // Fallback to base count if API fails
+        setViewCount(BASE_COUNT);
+      }
+    };
 
-    if (lastVisit !== today) {
-      const newCount = (stored || BASE_COUNT) + 1;
-      localStorage.setItem(STORAGE_KEY, newCount.toString());
-      localStorage.setItem(VISIT_KEY, today);
-      setViewCount(newCount);
-    } else {
-      setViewCount(stored || BASE_COUNT);
-    }
+    fetchViews();
   }, []);
 
   return (
